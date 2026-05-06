@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Typing Test</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ Speed Typing Test</h1>
+            <p class="subtitle">Test your typing speed and accuracy</p>
+        </header>
+
+        <div class="test-wrapper" id="test-wrapper">
+            <div id="origin-text">
+                <p id="origin-paragraph"></p>
+            </div>
+            
+            <textarea 
+                id="test-area" 
+                placeholder="Click here and start typing..."
+                spellcheck="false"
+            ></textarea>
+        </div>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div class="meta">
+            <div class="stat-card">
+                <span class="stat-label">Timer</span>
+                <span class="stat-value" id="timer">00:00:00</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">WPM</span>
+                <span class="stat-value" id="wpm">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Errors</span>
+                <span class="stat-value" id="errors">0</span>
+            </div>
+            <button id="reset" class="btn-reset">Start Over</button>
+        </div>
+
+        <div class="high-scores">
+            <h2>🏆 Top 3 Fastest Times</h2>
+            <ol id="score-list">
+                <li class="no-scores">No scores yet. Complete a test!</li>
+            </ol>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
