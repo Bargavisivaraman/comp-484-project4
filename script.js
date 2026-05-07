@@ -1,109 +1,182 @@
-// ==========================
-// Part 1: Date Display
-// ==========================
+const testWrapper = document.getElementById('test-wrapper');
+const testArea = document.getElementById('test-area');
+const originParagraph = document.getElementById('origin-paragraph');
+const resetButton = document.getElementById('reset');
+const timerDisplay = document.getElementById('timer');
+const wpmDisplay = document.getElementById('wpm');
+const errorsDisplay = document.getElementById('errors');
+const progressBar = document.getElementById('progress-bar');
+const scoreList = document.getElementById('score-list');
 
-const today = new Date();
+let timer = [0, 0, 0];
+let interval = null;
+let timerRunning = false;
+let errorCount = 0;
+let testComplete = false;
+let currentText = '';
 
-// get current date parts
-let month = today.getMonth() + 1; // add 1 since months start at 0
-let day = today.getDate();
-let year = today.getFullYear();
+const textArray = [
+    "The quick brown fox jumps over the lazy dog near the riverbank. This pangram contains every letter of the alphabet and serves as a perfect typing test. Practice makes perfect when it comes to improving your typing speed and accuracy.",
+    "JavaScript is a versatile programming language that powers the modern web. From simple DOM manipulation to complex server-side applications, JavaScript continues to evolve and shape the future of software development across multiple platforms.",
+    "Mountain peaks pierce through clouds as hikers navigate winding trails. The crisp air fills their lungs while scenic vistas reward their efforts. Nature's beauty reminds us to slow down and appreciate the world around us in all its glory.",
+    "Artificial intelligence transforms industries by automating tasks and providing insights. Machine learning algorithms analyze vast datasets to uncover patterns invisible to human observers. The future promises even more revolutionary advances in this field.",
+    "Coffee brewing is both an art and a science. The perfect cup requires precise water temperature, optimal grind size, and careful timing. Enthusiasts debate methods endlessly, from pour-over to espresso, each technique offering unique flavor profiles.",
+    "Ancient civilizations built magnificent structures that still inspire awe today. From Egyptian pyramids to Roman aqueducts, these engineering marvels demonstrate human ingenuity. Modern archaeologists continue uncovering secrets buried beneath layers of time and earth.",
+    "Ocean waves crash against rocky shores while seabirds circle overhead. Marine ecosystems teem with life, from microscopic plankton to massive whales. Protecting these vital habitats ensures future generations can enjoy the wonders of the sea."
+];
 
-// add leading zeros if needed
-if (month < 10) {
-  month = "0" + month;
-}
-if (day < 10) {
-  day = "0" + day;
-}
+document.addEventListener('DOMContentLoaded', function() {
+    loadRandomText();
+    loadHighScores();
+    testArea.focus();
+});
 
-const dateMessage = "Today is " + month + "/" + day + "/" + year;
-
-document.getElementById("dateOutput").textContent = dateMessage;
-
-// ==========================
-// Part 2: Number Conversion
-// ==========================
-
-// test values - some valid numbers, one invalid
-const value1 = "42";
-const value2 = "19.75";
-const value3 = "hello";
-const value4 = "100";
-
-// convert to numbers
-const num1 = Number(value1);
-const num2 = Number(value2);
-const num3 = Number(value3);
-const num4 = Number(value4);
-
-// build result strings
-let result1 = "Original: '" + value1 + "' → Converted: " + num1 + 
-              " → isNaN: " + Number.isNaN(num1) + 
-              " → isInteger: " + Number.isInteger(num1);
-
-let result2 = "Original: '" + value2 + "' → Converted: " + num2 + 
-              " → isNaN: " + Number.isNaN(num2) + 
-              " → isInteger: " + Number.isInteger(num2);
-
-let result3 = "Original: '" + value3 + "' → Converted: " + num3 + 
-              " → isNaN: " + Number.isNaN(num3) + 
-              " → isInteger: " + Number.isInteger(num3);
-
-let result4 = "Original: '" + value4 + "' → Converted: " + num4 + 
-              " → isNaN: " + Number.isNaN(num4) + 
-              " → isInteger: " + Number.isInteger(num4);
-
-// check if value is NaN and show message
-let nanMessage = "";
-if (Number.isNaN(num3)) {
-  nanMessage = "<p><strong>Note:</strong> The value 'hello' is not a valid number.</p>";
+function loadRandomText() {
+    const randomIndex = Math.floor(Math.random() * textArray.length);
+    currentText = textArray[randomIndex];
+    originParagraph.textContent = currentText;
 }
 
-// combine all results
-const allResults = "<p>" + result1 + "</p>" + 
-                   "<p>" + result2 + "</p>" + 
-                   "<p>" + result3 + "</p>" + 
-                   "<p>" + result4 + "</p>" + 
-                   nanMessage;
-
-document.getElementById("numberConversionOutput").innerHTML = allResults;
-
-// ==========================
-// Part 3: Math & Formatting
-// (Option B: Grade Score Calculator)
-// ==========================
-
-// define grade scores
-const exam1 = 85;
-const exam2 = 92;
-const exam3 = 78;
-const homework = 88;
-const project = 95;
-
-// calculate total and average
-const totalScore = exam1 + exam2 + exam3 + homework + project;
-const averageScore = totalScore / 5;
-
-// format average to 2 decimal places
-const formattedAverage = averageScore.toFixed(2);
-
-// build output
-let mathResults = "<h3>Grade Breakdown</h3>";
-mathResults += "<p><strong>Exam 1:</strong> " + exam1 + "</p>";
-mathResults += "<p><strong>Exam 2:</strong> " + exam2 + "</p>";
-mathResults += "<p><strong>Exam 3:</strong> " + exam3 + "</p>";
-mathResults += "<p><strong>Homework:</strong> " + homework + "</p>";
-mathResults += "<p><strong>Project:</strong> " + project + "</p>";
-mathResults += "<h3>Results</h3>";
-mathResults += "<p><strong>Total Score:</strong> " + totalScore + " points</p>";
-mathResults += "<p><strong>Average Score:</strong> " + formattedAverage + "</p>";
-
-// check if passing (70 or higher)
-if (averageScore >= 70) {
-  mathResults += "<p style='color: green;'><strong>✓ Status: Passing</strong></p>";
-} else {
-  mathResults += "<p style='color: red;'><strong>✗ Status: Not Passing</strong></p>";
+function leadingZero(time) {
+    return time < 10 ? '0' + time : time;
 }
 
-document.getElementById("mathOutput").innerHTML = mathResults;
+function runTimer() {
+    let currentTime = leadingZero(timer[0]) + ':' + leadingZero(timer[1]) + ':' + leadingZero(timer[2]);
+    timerDisplay.textContent = currentTime;
+    timer[2]++;
+    if (timer[2] === 100) {
+        timer[2] = 0;
+        timer[1]++;
+    }
+    if (timer[1] === 60) {
+        timer[1] = 0;
+        timer[0]++;
+    }
+}
+
+function startTimer() {
+    if (!timerRunning) {
+        interval = setInterval(runTimer, 10);
+        timerRunning = true;
+    }
+}
+
+function stopTimer() {
+    clearInterval(interval);
+    timerRunning = false;
+}
+
+function resetTimer() {
+    stopTimer();
+    timer = [0, 0, 0];
+    timerDisplay.textContent = '00:00:00';
+}
+
+function checkAccuracy() {
+    const typedText = testArea.value;
+    const typedLength = typedText.length;
+    const targetSubstring = currentText.substring(0, typedLength);
+    
+    if (typedText === targetSubstring) {
+        testWrapper.className = 'test-wrapper typing';
+        if (typedText === currentText) {
+            testComplete = true;
+            testWrapper.className = 'test-wrapper complete';
+            stopTimer();
+            saveScore();
+        }
+    } else {
+        testWrapper.className = 'test-wrapper incorrect';
+        if (typedLength > 0 && typedText !== targetSubstring) {
+            const lastChar = typedText[typedLength - 1];
+            const expectedChar = currentText[typedLength - 1];
+            if (lastChar !== expectedChar) {
+                errorCount++;
+                errorsDisplay.textContent = errorCount;
+            }
+        }
+    }
+    
+    updateProgressBar(typedLength);
+    calculateWPM(typedLength);
+}
+
+function calculateWPM(typedCharacters) {
+    const totalSeconds = timer[0] * 60 + timer[1] + timer[2] / 100;
+    if (totalSeconds > 0) {
+        const wpm = Math.round((typedCharacters / 5) / (totalSeconds / 60));
+        wpmDisplay.textContent = wpm;
+    } else {
+        wpmDisplay.textContent = '0';
+    }
+}
+
+function updateProgressBar(typedLength) {
+    const percentage = (typedLength / currentText.length) * 100;
+    progressBar.style.width = percentage + '%';
+}
+
+testArea.addEventListener('input', function() {
+    if (!timerRunning && !testComplete) {
+        startTimer();
+    }
+    if (!testComplete) {
+        checkAccuracy();
+    }
+});
+
+testArea.addEventListener('paste', function(e) {
+    e.preventDefault();
+    alert('Pasting is disabled! You must type the text yourself.');
+});
+
+resetButton.addEventListener('click', reset);
+
+function reset() {
+    resetTimer();
+    testArea.value = '';
+    errorCount = 0;
+    testComplete = false;
+    errorsDisplay.textContent = '0';
+    wpmDisplay.textContent = '0';
+    testWrapper.className = 'test-wrapper';
+    progressBar.style.width = '0%';
+    loadRandomText();
+    testArea.focus();
+}
+
+function saveScore() {
+    let scores = JSON.parse(localStorage.getItem('typingScores')) || [];
+    const totalSeconds = timer[0] * 60 + timer[1] + timer[2] / 100;
+    const finalWPM = parseInt(wpmDisplay.textContent);
+    const newScore = {
+        time: timerDisplay.textContent,
+        seconds: totalSeconds,
+        wpm: finalWPM,
+        errors: errorCount
+    };
+    scores.push(newScore);
+    scores.sort(function(a, b) { return a.seconds - b.seconds; });
+    scores = scores.slice(0, 3);
+    localStorage.setItem('typingScores', JSON.stringify(scores));
+    loadHighScores();
+}
+
+function loadHighScores() {
+    const scores = JSON.parse(localStorage.getItem('typingScores')) || [];
+    scoreList.innerHTML = '';
+    if (scores.length === 0) {
+        scoreList.innerHTML = '<li class="no-scores">No scores yet. Complete a test!</li>';
+    } else {
+        scores.forEach(function(score) {
+            const li = document.createElement('li');
+            li.innerHTML = '<span class="score-time">' + score.time + '</span><span class="score-wpm">' + score.wpm + ' WPM • ' + score.errors + ' errors</span>';
+            scoreList.appendChild(li);
+        });
+    }
+}
+
+window.addEventListener('load', function() {
+    testArea.focus();
+});
