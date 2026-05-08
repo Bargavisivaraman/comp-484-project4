@@ -14,6 +14,7 @@ let timerRunning = false;
 let errorCount = 0;
 let testComplete = false;
 let currentText = '';
+let isPaused = false;
 
 const textArray = [
     "The quick brown fox jumps over the lazy dog near the riverbank. This pangram contains every letter of the alphabet and serves as a perfect typing test. Practice makes perfect when it comes to improving your typing speed and accuracy.",
@@ -29,7 +30,40 @@ document.addEventListener('DOMContentLoaded', function() {
     loadRandomText();
     loadHighScores();
     testArea.focus();
+    createPauseButton();
 });
+
+function createPauseButton() {
+    const pauseButton = document.createElement('button');
+    pauseButton.id = 'pause-btn';
+    pauseButton.className = 'btn-pause';
+    pauseButton.textContent = 'Pause';
+    pauseButton.style.display = 'none';
+    
+    const metaDiv = document.querySelector('.meta');
+    metaDiv.insertBefore(pauseButton, resetButton);
+    
+    pauseButton.addEventListener('click', togglePause);
+}
+
+function togglePause() {
+    const pauseButton = document.getElementById('pause-btn');
+    
+    if (!timerRunning) return;
+    
+    if (isPaused) {
+        interval = setInterval(runTimer, 10);
+        isPaused = false;
+        pauseButton.textContent = 'Pause';
+        testArea.disabled = false;
+        testArea.focus();
+    } else {
+        clearInterval(interval);
+        isPaused = true;
+        pauseButton.textContent = 'Resume';
+        testArea.disabled = true;
+    }
+}
 
 function loadRandomText() {
     const randomIndex = Math.floor(Math.random() * textArray.length);
@@ -59,18 +93,25 @@ function startTimer() {
     if (!timerRunning) {
         interval = setInterval(runTimer, 10);
         timerRunning = true;
+        document.getElementById('pause-btn').style.display = 'block';
     }
 }
 
 function stopTimer() {
     clearInterval(interval);
     timerRunning = false;
+    isPaused = false;
 }
 
 function resetTimer() {
     stopTimer();
     timer = [0, 0, 0];
     timerDisplay.textContent = '00:00:00';
+    const pauseButton = document.getElementById('pause-btn');
+    if (pauseButton) {
+        pauseButton.style.display = 'none';
+        pauseButton.textContent = 'Pause';
+    }
 }
 
 function checkAccuracy() {
@@ -136,6 +177,7 @@ resetButton.addEventListener('click', reset);
 function reset() {
     resetTimer();
     testArea.value = '';
+    testArea.disabled = false;
     errorCount = 0;
     testComplete = false;
     errorsDisplay.textContent = '0';
