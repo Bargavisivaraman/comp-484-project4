@@ -16,13 +16,16 @@ let testComplete = false;
 let currentText = '';
 
 const textArray = [
-    "The quick brown fox jumps over the lazy dog near the riverbank. This pangram contains every letter of the alphabet and serves as a perfect typing test. Practice makes perfect when it comes to improving your typing speed and accuracy.",
-    "JavaScript is a versatile programming language that powers the modern web. From simple DOM manipulation to complex server-side applications, JavaScript continues to evolve and shape the future of software development across multiple platforms.",
-    "Mountain peaks pierce through clouds as hikers navigate winding trails. The crisp air fills their lungs while scenic vistas reward their efforts. Nature's beauty reminds us to slow down and appreciate the world around us in all its glory.",
-    "Artificial intelligence transforms industries by automating tasks and providing insights. Machine learning algorithms analyze vast datasets to uncover patterns invisible to human observers. The future promises even more revolutionary advances in this field.",
-    "Coffee brewing is both an art and a science. The perfect cup requires precise water temperature, optimal grind size, and careful timing. Enthusiasts debate methods endlessly, from pour-over to espresso, each technique offering unique flavor profiles.",
-    "Ancient civilizations built magnificent structures that still inspire awe today. From Egyptian pyramids to Roman aqueducts, these engineering marvels demonstrate human ingenuity. Modern archaeologists continue uncovering secrets buried beneath layers of time and earth.",
-    "Ocean waves crash against rocky shores while seabirds circle overhead. Marine ecosystems teem with life, from microscopic plankton to massive whales. Protecting these vital habitats ensures future generations can enjoy the wonders of the sea."
+    "The quick brown fox jumps over the lazy dog.",
+    "JavaScript powers the modern web with ease.",
+    "Practice makes perfect when learning to type.",
+    "Coffee brewing is both an art and science.",
+    "Mountain peaks pierce through clouds above.",
+    "Ocean waves crash against rocky shores.",
+    "Technology evolves faster every single year.",
+    "Ancient pyramids still inspire awe today.",
+    "Music brings people together across borders.",
+    "Reading books expands your imagination daily."
 ];
 
 document.addEventListener('DOMContentLoaded', function() {
