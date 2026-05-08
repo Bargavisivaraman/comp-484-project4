@@ -1,10 +1,10 @@
 # ⚡ Speed Typing Test
 
-A professional-grade typing test application built with vanilla JavaScript, HTML, and CSS. Test your typing speed and accuracy with real-time feedback and persistent high scores.
+A professional typing test application built with vanilla JavaScript, HTML, and CSS. Test your typing speed and accuracy with real-time feedback and persistent high scores.
 
 ## 🌐 Live Demo
 
-[Add your GitHub Pages link here after deployment]
+https://bargavisivaraman.github.io/comp-484-project4/
 
 ## ✨ Features
 
@@ -20,8 +20,6 @@ A professional-grade typing test application built with vanilla JavaScript, HTML
   - 🔴 Red border: Typo detected
   - 🟢 Green border: Test completed successfully
   
-- **Data Persistence**: Top 3 fastest scores saved in localStorage
-- **Content Randomization**: 7 different text paragraphs
 - **Live Performance Metrics**:
   - Real-time WPM (Words Per Minute) calculation
   - Error counter tracking mistyped characters
@@ -31,7 +29,7 @@ A professional-grade typing test application built with vanilla JavaScript, HTML
 - **Responsive Design**: Works on mobile and desktop
 - **Focus Management**: Auto-focus for seamless user experience
 
-## 🎯 Key Implementation Details
+## Key Implementation Details
 
 ### The Accuracy Algorithm
 Uses `.substring()` to compare user input with the expected text portion:
@@ -80,7 +78,7 @@ Callback function ensures proper time-based ranking:
 scores.sort((a, b) => a.seconds - b.seconds);
 ```
 
-## 🚀 Deployment Instructions
+## Deployment Instructions
 
 ### GitHub Pages Setup
 
@@ -105,7 +103,7 @@ scores.sort((a, b) => a.seconds - b.seconds);
 5. **Update README**:
    ```markdown
    ## 🌐 Live Demo
-   https://yourusername.github.io/typing-test/
+ https://bargavisivaraman.github.io/comp-484-project4/
    ```
 
 ## 📁 Project Structure
@@ -119,46 +117,17 @@ typing-test/
 └── README.md       # Project documentation
 ```
 
-## 🎓 Grading Rubric Compliance
-
-| Category | Implementation | ✅ |
-|----------|---------------|-----|
-| **Basic Logic (40%)** | Timer with 00:00:00 format, input validation | ✅ |
-| **Visual Feedback (20%)** | Grey/Blue/Red/Green border states | ✅ |
-| **Persistence (15%)** | Top 3 scores in localStorage | ✅ |
-| **Code Quality (15%)** | Clean code, comments, descriptive variables | ✅ |
-| **UX & Creativity (10%)** | Random text, WPM/errors, progress bar, paste prevention | ✅ |
-
-## 🎤 Presentation Topics
-
-Choose two unique topics from the project requirements list for your presentation.
-
-**Suggested Topics** (based on what's available):
-1. **Local Storage Integration** - Show JSON.stringify/parse logic
-2. **The Completion Trigger** - Explain exact match vs length check
-3. **Randomization Strategy** - Demonstrate Math.random() paragraph selection
-4. **Paste Prevention** - Show event.preventDefault() security
-5. **Focus Management** - Demonstrate .focus() for UX
-
-## 💻 Technologies Used
+##  Technologies Used
 
 - HTML5
 - CSS3 (Flexbox, Grid, Animations)
 - Vanilla JavaScript (ES6+)
 - LocalStorage API
 
-## 🎨 Design Features
+## Design Features
 
 - Modern gradient background
 - Smooth transitions and animations
 - Responsive layout for all screen sizes
 - Professional color scheme
 - Clear visual hierarchy
-
-## 📝 License
-
-This project is created for educational purposes as part of a web development course.
-
----
-
-Built with ❤️ for Project 4
