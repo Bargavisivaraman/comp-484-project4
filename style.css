@@ -292,3 +292,25 @@ header h1 {
 .complete {
     animation: pulse 0.5s ease;
 }
+.btn-pause {
+    padding: 20px 35px;
+    background: #FFC107;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+}
+
+.btn-pause:hover {
+    background: #FFB300;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.5);
+}
+
+.btn-pause:active {
+    transform: translateY(0);
+}
