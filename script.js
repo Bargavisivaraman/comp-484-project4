@@ -1,3 +1,5 @@
+console.log('Script loaded!');
+
 const testWrapper = document.getElementById('test-wrapper');
 const testArea = document.getElementById('test-area');
 const originParagraph = document.getElementById('origin-paragraph');
@@ -28,17 +30,36 @@ const textArray = [
     "Reading books expands your imagination daily."
 ];
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadRandomText();
-    loadHighScores();
-    testArea.focus();
-});
+console.log('Text array loaded:', textArray.length, 'texts');
 
 function loadRandomText() {
+    console.log('loadRandomText called');
     const randomIndex = Math.floor(Math.random() * textArray.length);
     currentText = textArray[randomIndex];
-    originParagraph.textContent = currentText;
+    if (originParagraph) {
+        originParagraph.textContent = currentText;
+        console.log('Text loaded:', currentText);
+    } else {
+        console.error('originParagraph element not found!');
+    }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded');
+    loadRandomText();
+    loadHighScores();
+    if (testArea) {
+        testArea.focus();
+    }
+});
+
+// Backup: Load text after 1 second if DOMContentLoaded fails
+setTimeout(function() {
+    if (originParagraph && !originParagraph.textContent) {
+        console.log('Backup text load triggered');
+        loadRandomText();
+    }
+}, 1000);
 
 function leadingZero(time) {
     return time < 10 ? '0' + time : time;
@@ -120,21 +141,25 @@ function updateProgressBar(typedLength) {
     progressBar.style.width = percentage + '%';
 }
 
-testArea.addEventListener('input', function() {
-    if (!timerRunning && !testComplete) {
-        startTimer();
-    }
-    if (!testComplete) {
-        checkAccuracy();
-    }
-});
+if (testArea) {
+    testArea.addEventListener('input', function() {
+        if (!timerRunning && !testComplete) {
+            startTimer();
+        }
+        if (!testComplete) {
+            checkAccuracy();
+        }
+    });
 
-testArea.addEventListener('paste', function(e) {
-    e.preventDefault();
-    alert('Pasting is disabled! You must type the text yourself.');
-});
+    testArea.addEventListener('paste', function(e) {
+        e.preventDefault();
+        alert('Pasting is disabled! You must type the text yourself.');
+    });
+}
 
-resetButton.addEventListener('click', reset);
+if (resetButton) {
+    resetButton.addEventListener('click', reset);
+}
 
 function reset() {
     resetTimer();
@@ -181,5 +206,10 @@ function loadHighScores() {
 }
 
 window.addEventListener('load', function() {
-    testArea.focus();
+    console.log('Window loaded');
+    if (testArea) {
+        testArea.focus();
+    }
 });
+
+console.log('Script finished loading');
