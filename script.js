@@ -1,186 +1,202 @@
-const testWrapper = document.getElementById('test-wrapper');
-const testArea = document.getElementById('test-area');
-const originParagraph = document.getElementById('origin-paragraph');
-const resetButton = document.getElementById('reset');
-const timerDisplay = document.getElementById('timer');
-const wpmDisplay = document.getElementById('wpm');
-const errorsDisplay = document.getElementById('errors');
-const progressBar = document.getElementById('progress-bar');
-const scoreList = document.getElementById('score-list');
-
-let timer = [0, 0, 0];
-let interval = null;
-let timerRunning = false;
-let errorCount = 0;
-let testComplete = false;
-let currentText = '';
-
-const textArray = [
-    "The quick brown fox jumps over the lazy dog.",
-    "JavaScript powers the modern web with ease.",
-    "Practice makes perfect when learning to type.",
-    "Coffee brewing is both an art and science.",
-    "Mountain peaks pierce through clouds above.",
-    "Ocean waves crash against rocky shores.",
-    "Technology evolves faster every single year.",
-    "Ancient pyramids still inspire awe today.",
-    "Music brings people together across borders.",
-    "Reading books expands your imagination daily."
+// list of CSUN locations to quiz on
+// each one has a name and a bounding box (NE and SW corners)
+var locations = [
+    {
+        name: "the Oviatt Library",
+        ne: { lat: 34.2410, lng: -118.5285 },
+        sw: { lat: 34.2395, lng: -118.5305 }
+    },
+    {
+        name: "Sierra Hall",
+        ne: { lat: 34.2390, lng: -118.5290 },
+        sw: { lat: 34.2378, lng: -118.5310 }
+    },
+    {
+        name: "the University Student Union",
+        ne: { lat: 34.2400, lng: -118.5255 },
+        sw: { lat: 34.2388, lng: -118.5275 }
+    },
+    {
+        name: "the Bookstore",
+        ne: { lat: 34.2412, lng: -118.5263 },
+        sw: { lat: 34.2402, lng: -118.5278 }
+    },
+    {
+        name: "the Student Recreation Center",
+        ne: { lat: 34.2420, lng: -118.5253 },
+        sw: { lat: 34.2407, lng: -118.5273 }
+    }
 ];
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadRandomText();
-    loadHighScores();
-    testArea.focus();
-});
+// quiz state
+var map;
+var currentIndex = 0;
+var correctCount = 0;
+var timer = 0;
+var timerInterval;
+var animatedLine;
 
-function loadRandomText() {
-    const randomIndex = Math.floor(Math.random() * textArray.length);
-    currentText = textArray[randomIndex];
-    originParagraph.textContent = currentText;
+// runs when the API loads
+function initMap() {
+
+    // create the map centered on CSUN with all interactions disabled
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 34.2400, lng: -118.5280 },
+        zoom: 17,
+        disableDefaultUI: true,
+        gestureHandling: "none",
+        zoomControl: false,
+        scrollwheel: false,
+        disableDoubleClickZoom: true,
+        draggable: false
+    });
+
+    // listen for double clicks on the map
+    map.addListener("dblclick", handleDoubleClick);
+
+    // show the first question
+    showNextQuestion();
+
+    // start the timer
+    timerInterval = setInterval(function() {
+        timer++;
+        $("#timer").text(timer);
+    }, 1000);
+
+    // load any saved high score
+    loadHighScore();
 }
 
-function leadingZero(time) {
-    return time < 10 ? '0' + time : time;
-}
-
-function runTimer() {
-    let currentTime = leadingZero(timer[0]) + ':' + leadingZero(timer[1]) + ':' + leadingZero(timer[2]);
-    timerDisplay.textContent = currentTime;
-    timer[2]++;
-    if (timer[2] === 100) {
-        timer[2] = 0;
-        timer[1]++;
+// display the current question prompt
+function showNextQuestion() {
+    if (currentIndex >= locations.length) {
+        endQuiz();
+        return;
     }
-    if (timer[1] === 60) {
-        timer[1] = 0;
-        timer[0]++;
+    var loc = locations[currentIndex];
+    $("#prompts").append('<div class="prompt">Where is ' + loc.name + '?</div>');
+}
+
+// called when the user double clicks on the map
+function handleDoubleClick(event) {
+
+    if (currentIndex >= locations.length) {
+        return;
     }
-}
 
-function startTimer() {
-    if (!timerRunning) {
-        interval = setInterval(runTimer, 10);
-        timerRunning = true;
-    }
-}
+    var lat = event.latLng.lat();
+    var lng = event.latLng.lng();
+    var loc = locations[currentIndex];
 
-function stopTimer() {
-    clearInterval(interval);
-    timerRunning = false;
-}
+    // check if the click is inside the location bounds
+    var inside = (lat <= loc.ne.lat && lat >= loc.sw.lat &&
+                  lng <= loc.ne.lng && lng >= loc.sw.lng);
 
-function resetTimer() {
-    stopTimer();
-    timer = [0, 0, 0];
-    timerDisplay.textContent = '00:00:00';
-}
-
-function checkAccuracy() {
-    const typedText = testArea.value;
-    const typedLength = typedText.length;
-    const targetSubstring = currentText.substring(0, typedLength);
-    
-    if (typedText === targetSubstring) {
-        testWrapper.className = 'test-wrapper typing';
-        if (typedText === currentText) {
-            testComplete = true;
-            testWrapper.className = 'test-wrapper complete';
-            stopTimer();
-            saveScore();
-        }
+    if (inside) {
+        // correct answer, draw a green rectangle
+        drawRectangle(loc, "#00aa00");
+        $("#prompts").append('<div class="correct">Your answer is correct!!</div>');
+        correctCount++;
+        runAnimation(loc);
     } else {
-        testWrapper.className = 'test-wrapper incorrect';
-        if (typedLength > 0 && typedText !== targetSubstring) {
-            const lastChar = typedText[typedLength - 1];
-            const expectedChar = currentText[typedLength - 1];
-            if (lastChar !== expectedChar) {
-                errorCount++;
-                errorsDisplay.textContent = errorCount;
-            }
+        // wrong answer, draw a red rectangle on the actual location
+        drawRectangle(loc, "#cc0000");
+        $("#prompts").append('<div class="wrong">Sorry wrong location.</div>');
+    }
+
+    currentIndex++;
+    showNextQuestion();
+}
+
+// draws a colored rectangle over a location
+function drawRectangle(loc, color) {
+    new google.maps.Rectangle({
+        strokeColor: color,
+        strokeOpacity: 0.9,
+        strokeWeight: 2,
+        fillColor: color,
+        fillOpacity: 0.35,
+        map: map,
+        bounds: {
+            north: loc.ne.lat,
+            south: loc.sw.lat,
+            east: loc.ne.lng,
+            west: loc.sw.lng
         }
-    }
-    
-    updateProgressBar(typedLength);
-    calculateWPM(typedLength);
+    });
 }
 
-function calculateWPM(typedCharacters) {
-    const totalSeconds = timer[0] * 60 + timer[1] + timer[2] / 100;
-    if (totalSeconds > 0) {
-        const wpm = Math.round((typedCharacters / 5) / (totalSeconds / 60));
-        wpmDisplay.textContent = wpm;
-    } else {
-        wpmDisplay.textContent = '0';
+// animated polyline using a moving arrow symbol
+// this uses google.maps.Polyline and google.maps.SymbolPath
+function runAnimation(loc) {
+
+    // remove the previous line if there is one
+    if (animatedLine) {
+        animatedLine.setMap(null);
     }
-}
 
-function updateProgressBar(typedLength) {
-    const percentage = (typedLength / currentText.length) * 100;
-    progressBar.style.width = percentage + '%';
-}
+    var centerLat = (loc.ne.lat + loc.sw.lat) / 2;
+    var centerLng = (loc.ne.lng + loc.sw.lng) / 2;
 
-testArea.addEventListener('input', function() {
-    if (!timerRunning && !testComplete) {
-        startTimer();
-    }
-    if (!testComplete) {
-        checkAccuracy();
-    }
-});
-
-testArea.addEventListener('paste', function(e) {
-    e.preventDefault();
-    alert('Pasting is disabled! You must type the text yourself.');
-});
-
-resetButton.addEventListener('click', reset);
-
-function reset() {
-    resetTimer();
-    testArea.value = '';
-    errorCount = 0;
-    testComplete = false;
-    errorsDisplay.textContent = '0';
-    wpmDisplay.textContent = '0';
-    testWrapper.className = 'test-wrapper';
-    progressBar.style.width = '0%';
-    loadRandomText();
-    testArea.focus();
-}
-
-function saveScore() {
-    let scores = JSON.parse(localStorage.getItem('typingScores')) || [];
-    const totalSeconds = timer[0] * 60 + timer[1] + timer[2] / 100;
-    const finalWPM = parseInt(wpmDisplay.textContent);
-    const newScore = {
-        time: timerDisplay.textContent,
-        seconds: totalSeconds,
-        wpm: finalWPM,
-        errors: errorCount
+    // moving arrow symbol
+    var arrow = {
+        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+        scale: 4,
+        strokeColor: "#0000ff"
     };
-    scores.push(newScore);
-    scores.sort(function(a, b) { return a.seconds - b.seconds; });
-    scores = scores.slice(0, 3);
-    localStorage.setItem('typingScores', JSON.stringify(scores));
-    loadHighScores();
-    alert('Score saved! Time: ' + newScore.time);
+
+    // draw a short line near the correct location
+    animatedLine = new google.maps.Polyline({
+        path: [
+            { lat: centerLat - 0.0005, lng: centerLng - 0.0005 },
+            { lat: centerLat + 0.0005, lng: centerLng + 0.0005 }
+        ],
+        icons: [{
+            icon: arrow,
+            offset: "0%"
+        }],
+        map: map,
+        strokeColor: "#0000ff",
+        strokeWeight: 3
+    });
+
+    // animate the arrow along the line
+    var count = 0;
+    var animInterval = setInterval(function() {
+        count = (count + 2) % 200;
+        var icons = animatedLine.get("icons");
+        icons[0].offset = (count / 2) + "%";
+        animatedLine.set("icons", icons);
+        if (count === 0) {
+            clearInterval(animInterval);
+        }
+    }, 30);
 }
 
-function loadHighScores() {
-    const scores = JSON.parse(localStorage.getItem('typingScores')) || [];
-    scoreList.innerHTML = '';
-    if (scores.length === 0) {
-        scoreList.innerHTML = '<li class="no-scores">No scores yet. Complete a test!</li>';
-    } else {
-        scores.forEach(function(score) {
-            const li = document.createElement('li');
-            li.innerHTML = '<span class="score-time">' + score.time + '</span><span class="score-wpm">' + score.wpm + ' WPM • ' + score.errors + ' errors</span>';
-            scoreList.appendChild(li);
-        });
+// end of quiz display
+function endQuiz() {
+    clearInterval(timerInterval);
+    var wrong = locations.length - correctCount;
+    $("#finalScore").text(correctCount + " Correct, " + wrong + " Incorrect");
+
+    // save high score if it was a perfect run
+    if (correctCount === locations.length) {
+        saveHighScore(timer);
     }
 }
 
-window.addEventListener('load', function() {
-    testArea.focus();
-});
+// high score handling using localStorage
+function loadHighScore() {
+    var saved = localStorage.getItem("csunMapHighScore");
+    if (saved) {
+        $("#highscore").text(saved + "s");
+    }
+}
+
+function saveHighScore(time) {
+    var saved = localStorage.getItem("csunMapHighScore");
+    if (!saved || time < parseInt(saved)) {
+        localStorage.setItem("csunMapHighScore", time);
+        $("#highscore").text(time + "s (new!)");
+    }
+}
